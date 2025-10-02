@@ -214,14 +214,14 @@ How to consume configs in project/microservice repos.
 Guide users on extending the repo.
 
 - **New Project**:
-- Create projects/new-project/.
-- Add common/docker-compose.yaml for shared infra (e.g., MySQL).
-- Create services/<service-name>/ with base/config.yaml and environment folders.
+    - Create projects/new-project/.
+    - Add common/docker-compose.yaml for shared infra (e.g., MySQL).
+    - Create services/<service-name>/ with base/config.yaml and environment folders.
 
 - **New Microservice**:
-- Add projects/<project>/services/new-service/.
-- Create base/config.yaml and docker-compose.override.yaml.
-- Update project README.md.
+    - Add projects/<project>/services/new-service/.
+    - Create base/config.yaml and docker-compose.override.yaml.
+    - Update project README.md.
 
 See docs/examples/add-service.md for a template.
 
