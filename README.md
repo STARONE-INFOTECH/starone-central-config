@@ -2,13 +2,35 @@
 
 This repository serves as the centralized storage for configuration files used across all STARONE applications and services. It ensures consistency, version control, and streamlined management of configurations for different environments (e.g., development, staging, production).
 
-## Purpose
+## 📂 Purpose
 - Provide a single source of truth for application and service configurations.
 - Enable version-controlled updates to configurations.
 - Facilitate collaboration and review of configuration changes across teams.
+---
+## 📂 Table of Contents
+
+- [Overview](#overview)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Adding a New Project or Microservice](#adding-a-new-project-or-microservice)
+- [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+---
+
+## 📂 Overview
+
+This repo ensures consistency across projects by storing shared infrastructure configs (e.g., MySQL, Kafka) and microservice-specific settings in one place, reducing duplication and simplifying updates. 
+Highlight key features like:
+- Centralized management of configs for multiple projects.
+- DRY principles with global (`common/`) and project-specific (`projects/<project>/common/`) configs.
+- Support for microservices with per-service overrides.
+- Environment-specific configurations (dev, staging, prod).
 
 ---
-# 📂 Repository Configuration Structure
+
+## 📂 Repository Structure
 
 This repository contains configuration files for multiple applications as well as shared/global configs.  
 Each application has environment-specific (`dev`, `prod`) and core settings, along with documentation.
@@ -150,29 +172,92 @@ Each application has environment-specific (`dev`, `prod`) and core settings, alo
 ```
 
 ---
+## 📂 Getting Started
+Steps to set up or access the repo.
 
-## 📌 Notes
+- **Clone the repo**:
+- bash 
+    ```
+    git clone https://github.com/your-org/central-configs.git
+    ```
 
-- **App Configs**  
-  Each application (`app1`, `app2`, `app3`) has its own configuration directory containing:
-  - `dev.yaml` → Development-specific configuration
-  - `prod.yaml` → Production configuration
-  - `settings.yaml` / `config.json` → Core application settings
-  - `env.json` / `secrets.env` → Environment variables (sensitive data should be managed securely)
-  - `README.md` → Explanation of how to use configs for the respective app  
+- **Install dependencies (e.g., for validation tools)**:
+- bash
+    ```
+    pip install yamllint
+    ```
 
-- **Shared Configs**  
-  - `/shared/global.yaml` → Common settings used across multiple applications  
+- **Validate configs**:
+- bash
+    ```
+    ./tools/validate-configs.sh
+    ```
+---
+## 📂 Usage
+How to consume configs in project/microservice repos.
 
-- **Documentation**  
-  - `/docs/README.md` → Repository overview and instructions  
-  - `/docs/CONTRIBUTING.md` → Contribution guidelines  
+- **Git Submodules**: Add configs to a service repo:
+- bash
+    ```
+    git submodule add https://github.com/your-org/central-configs configs
+    ```
+
+- **Docker Compose**: Combine project and service configs:
+- bash
+    ```
+    docker-compose -f configs/projects/sportstats/common/docker-compose.yaml -f configs/projects/sportstats/services/user-service/ docker-compose.override.yaml up
+    ```
+
+- **Merging Configs**: Use `yq` to merge YAML files:
+- bash
+    ```
+    yq eval-all '. as $item ireduce ({}; . * $item)' configs/common/base.yaml configs/projects/sportstats/base/config.yaml > merged.yaml
+    ```
+
+- **Secrets**: Reference environment variables (e.g., `${MYSQL_ROOT_PASSWORD}`) from external vaults or .env files (not committed).
+---
+## 📂 Adding a New Project or Microservice
+Guide users on extending the repo.
+
+- **New Project**:
+- Create projects/new-project/.
+- Add common/docker-compose.yaml for shared infra (e.g., MySQL).
+- Create services/<service-name>/ with base/config.yaml and environment folders.
+
+- **New Microservice**:
+- Add projects/<project>/services/new-service/.
+- Create base/config.yaml and docker-compose.override.yaml.
+- Update project README.md.
+
+See docs/examples/add-service.md for a template.
+---
+## 📂 Contributing
+Link to contribution guidelines and process.
+
+- See CONTRIBUTING.md for details.
+- All changes require a PR with at least one review.
+- Validate configs locally before pushing: ./tools/compose-validate.sh.
 
 ---
+## 📂 Troubleshooting
+Common issues and solutions.
 
-✅ This structure ensures:
-- Clear separation between apps  
-- Easy environment management (`dev`, `prod`)  
-- Centralized shared configurations  
-- Proper documentation for maintainability  
+- Invalid YAML: Run yamllint **/*.yaml.
+- Docker Compose errors: Check with docker-compose -f <file> config.
+- Missing secrets: Ensure .env or vault is set up.
+
+Open an issue for further assistance.
+---
+## 📂 License
+- Specify the license (link to file).
+- This project is licensed under the MIT License.
+---
+### Usage Notes
+- **Customization**: Replace placeholders (e.g., `StarOne`) with your GitHub org name. Add project-specific examples if needed (e.g., sportstats’ docker-compose).
+- **Tone**: Keep it professional yet approachable, as seen in open-source repos like Kubernetes or Spring.
+- **Maintenance**: Update when adding projects or changing workflows. Keep examples current.
+- **Markdown Best Practices**: Use headers, code blocks, and links for clarity. Avoid clutter.
+---
+
+
 
