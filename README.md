@@ -1,12 +1,12 @@
 # Central Configuration Repository
-
+---
 This repository serves as the centralized storage for configuration files used across all STARONE applications and services. It ensures consistency, version control, and streamlined management of configurations for different environments (e.g., development, staging, production).
 
 ## 📂 Purpose
 - Provide a single source of truth for application and service configurations.
 - Enable version-controlled updates to configurations.
 - Facilitate collaboration and review of configuration changes across teams.
----
+
 ## 📂 Table of Contents
 
 - [Overview](#overview)
@@ -17,7 +17,7 @@ This repository serves as the centralized storage for configuration files used a
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
----
+
 
 ## 📂 Overview
 
@@ -28,18 +28,14 @@ Highlight key features like:
 - Support for microservices with per-service overrides.
 - Environment-specific configurations (dev, staging, prod).
 
----
-
 ## 📂 Repository Structure
 
-This repository contains configuration files for multiple applications as well as shared/global configs.  
+This repository contains configuration files for multiple applications as well as shared/global configs. 
 Each application has environment-specific (`dev`, `prod`) and core settings, along with documentation.
-
----
 
 ## 📂 Directory Layout
 
-```text
+```
 📂 starone-central-configs-repo/
 ├── 📄 README.md                # Purpose, usage, how to add projects/services
 ├── 📄 LICENSE.md               # e.g., MIT
@@ -171,14 +167,13 @@ Each application has environment-specific (`dev`, `prod`) and core settings, alo
 
 ```
 
----
 ## 📂 Getting Started
 Steps to set up or access the repo.
 
 - **Clone the repo**:
 - bash 
     ```
-    git clone https://github.com/your-org/central-configs.git
+    git clone https://github.com/SachinSalunkeLead/starone-config-repo.git
     ```
 
 - **Install dependencies (e.g., for validation tools)**:
@@ -192,7 +187,6 @@ Steps to set up or access the repo.
     ```
     ./tools/validate-configs.sh
     ```
----
 ## 📂 Usage
 How to consume configs in project/microservice repos.
 
@@ -215,7 +209,7 @@ How to consume configs in project/microservice repos.
     ```
 
 - **Secrets**: Reference environment variables (e.g., `${MYSQL_ROOT_PASSWORD}`) from external vaults or .env files (not committed).
----
+
 ## 📂 Adding a New Project or Microservice
 Guide users on extending the repo.
 
@@ -230,7 +224,7 @@ Guide users on extending the repo.
 - Update project README.md.
 
 See docs/examples/add-service.md for a template.
----
+
 ## 📂 Contributing
 Link to contribution guidelines and process.
 
@@ -238,7 +232,6 @@ Link to contribution guidelines and process.
 - All changes require a PR with at least one review.
 - Validate configs locally before pushing: ./tools/compose-validate.sh.
 
----
 ## 📂 Troubleshooting
 Common issues and solutions.
 
@@ -247,11 +240,11 @@ Common issues and solutions.
 - Missing secrets: Ensure .env or vault is set up.
 
 Open an issue for further assistance.
----
+
 ## 📂 License
 - Specify the license (link to file).
 - This project is licensed under the MIT License.
----
+
 ### Usage Notes
 - **Customization**: Replace placeholders (e.g., `StarOne`) with your GitHub org name. Add project-specific examples if needed (e.g., sportstats’ docker-compose).
 - **Tone**: Keep it professional yet approachable, as seen in open-source repos like Kubernetes or Spring.
