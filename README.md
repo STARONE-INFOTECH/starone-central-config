@@ -19,21 +19,28 @@ This repository serves as the centralized storage for configuration files used a
 - [License](#license)
 
 
-## 📂 Overview
+## 🌐 Overview
 
-This repo ensures consistency across projects by storing shared infrastructure configs (e.g., MySQL, Kafka) and microservice-specific settings in one place, reducing duplication and simplifying updates. 
-Highlight key features like:
-- Centralized management of configs for multiple projects.
-- DRY principles with global (`common/`) and project-specific (`projects/<project>/common/`) configs.
-- Support for microservices with per-service overrides.
-- Environment-specific configurations (dev, staging, prod).
+This repo serves as the single source of truth for configurations across multiple microservices-based projects. Key features:
+- **Global Commons**: Shared configs (e.g., `common/base.yaml`) for logging, timeouts, etc.
+- **Project-Specific Configs**: Each project (e.g., sportstats) has its own shared infrastructure (e.g., MySQL, Kafka) and microservice settings.
+- **Environment Overrides**: Supports dev, staging, prod environments.
+- **Automation**: Validation scripts and CI/CD integration for reliability.
+
+## 🗂️ Projects
+
+List of projects managed in this repo:
+- **Sportstats**: Tracks sports data with microservices (e.g., user-service, stats-service).
+  - Dependencies: MySQL, PostgreSQL, Kafka.
+  - See [Sportstats Structure](#sportstats-structure) for details.
+- **Ecommerce**: Manages online store operations with microservices (e.g., cart-service, order-service).
+  - Dependencies: MySQL, Redis.
+  - See [Ecommerce Structure](#ecommerce-structure) for details.
 
 ## 📂 Repository Structure
 
 This repository contains configuration files for multiple applications as well as shared/global configs. 
 Each application has environment-specific (`dev`, `prod`) and core settings, along with documentation.
-
-## 📂 Directory Layout
 
 ```
 📂 starone-central-configs-repo/
@@ -166,6 +173,25 @@ Each application has environment-specific (`dev`, `prod`) and core settings, alo
         └── 📄 add-service.md
 
 ```
+## 🏟️ Sportstats Structure
+
+- `common/docker-compose.yaml`: Defines MySQL, PostgreSQL, Kafka.
+- `services/user-service/`: User management configs.
+- `services/stats-service/`: Stats processing configs.
+    
+## 🛒 dhs Structure
+
+- `common/docker-compose.yaml`: Defines MySQL, Redis.
+- `services/cart-service/`: Shopping cart configs.
+- `services/order-service/`: Order processing configs.
+    
+## 🔧 Prerequisites
+
+- **Git**: For cloning and managing the repo.
+- **Docker**: To run docker-compose files.
+- **yq**: For merging YAML configs (sudo apt install yq or equivalent).
+- **yamllint**: For validation (pip install yamllint).
+- **Optional**: Vault for secrets (e.g., AWS Secrets Manager).
 
 ## 📂 Getting Started
 Steps to set up or access the repo.
@@ -187,63 +213,68 @@ Steps to set up or access the repo.
     ```
     ./tools/validate-configs.sh
     ```
-## 📂 Usage
-How to consume configs in project/microservice repos.
-
-- **Git Submodules**: Add configs to a service repo:
+## 🚀 Usage
+- **Pull Configs**: In a microservice repo (e.g., sportstats-user-service):
 - bash
     ```
     git submodule add https://github.com/your-org/central-configs configs
     ```
 
-- **Docker Compose**: Combine project and service configs:
+- **Run Docker Compose**:
 - bash
     ```
     docker-compose -f configs/projects/sportstats/common/docker-compose.yaml -f configs/projects/sportstats/services/user-service/ docker-compose.override.yaml up
     ```
 
-- **Merging Configs**: Use `yq` to merge YAML files:
+- **Merge Configs**: Combine global, project, and service configs
 - bash
     ```
     yq eval-all '. as $item ireduce ({}; . * $item)' configs/common/base.yaml configs/projects/sportstats/base/config.yaml > merged.yaml
     ```
 
-- **Secrets**: Reference environment variables (e.g., `${MYSQL_ROOT_PASSWORD}`) from external vaults or .env files (not committed).
+- **Secrets**: Use .env files or a vault for variables like ${MYSQL_ROOT_PASSWORD}.
 
-## 📂 Adding a New Project or Microservice
+## ➕ Adding a New Project or Microservice
 Guide users on extending the repo.
 
 - **New Project**:
     - Create projects/new-project/.
-    - Add common/docker-compose.yaml for shared infra (e.g., MySQL).
-    - Create services/<service-name>/ with base/config.yaml and environment folders.
+    - Add common/docker-compose.yaml for shared infra.
+    - Create base/config.yaml and environment folders (dev/, staging/, prod/).
+    - Add services/ for microservices.
 
 - **New Microservice**:
-    - Add projects/<project>/services/new-service/.
-    - Create base/config.yaml and docker-compose.override.yaml.
-    - Update project README.md.
+    - Create projects/<project>/services/new-service/.
+    - Add base/config.yaml and docker-compose.override.yaml.
+    - Update project README.
+    - See docs/examples/add-service.md for a template.
+- Use templates in Resources.
 
-See docs/examples/add-service.md for a template.
-
-## 📂 Contributing
+## 🤝 Contributing
 Link to contribution guidelines and process.
 
-- See CONTRIBUTING.md for details.
-- All changes require a PR with at least one review.
-- Validate configs locally before pushing: ./tools/compose-validate.sh.
+- Follow CONTRIBUTING.md for details.
+- Run validation: ./tools/compose-validate.sh.
+- Submit PRs with one review minimum (see Tools).
 
-## 📂 Troubleshooting
-Common issues and solutions.
-
+## 🛠️ Troubleshooting
 - Invalid YAML: Run yamllint **/*.yaml.
 - Docker Compose errors: Check with docker-compose -f <file> config.
-- Missing secrets: Ensure .env or vault is set up.
+- Missing secrets: Ensure .env or vault is configured.
 
-Open an issue for further assistance.
+Open an issue for help.
 
-## 📂 License
-- Specify the license (link to file).
-- This project is licensed under the MIT License.
+## 📜 License
+This project is licensed under the MIT License.
+
+## 📚 Resources
+- Adding a Service Template
+- Architecture Diagram
+- Tools
+
+## 🛠️ Tools
+- `validate-configs.sh`: Lints YAML files.
+- `compose-validate.sh`: Validates docker-compose files.
 
 ### Usage Notes
 - **Customization**: Replace placeholders (e.g., `StarOne`) with your GitHub org name. Add project-specific examples if needed (e.g., sportstats’ docker-compose).
