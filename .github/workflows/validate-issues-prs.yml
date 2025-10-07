@@ -1,0 +1,48 @@
+name: 🧩 Validate Issues and PRs
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled]
+  pull_request:
+    types: [opened, edited, labeled, unlabeled, reopened, synchronize]
+
+jobs:
+  validate:
+    name: 🔍 Validate Issue & PR Formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧱 Check issue or PR context
+        id: context
+        run: |
+          echo "EVENT_NAME=${{ github.event_name }}" >> $GITHUB_ENV
+          echo "ISSUE_TITLE=${{ github.event.issue.title || github.event.pull_request.title }}" >> $GITHUB_ENV
+          echo "LABELS=$(jq -r '[.issue.labels[].name] | join(",")' <<< "${{ toJson(github.event.issue || github.event.pull_request) }}" || echo '')" >> $GITHUB_ENV
+
+      - name: 🧩 Validate title format
+        run: |
+          echo "Validating title: $ISSUE_TITLE"
+          if [[ ! "$ISSUE_TITLE" =~ ^\[(Feature|Bug|Task|Config|Refactor|Documentation|Test)\]\: ]]; then
+            echo "❌ Invalid title format."
+            echo "📝 Use one of the following formats:"
+            echo "  [Feature]: Implement Config Server"
+            echo "  [Bug]: Fix NullPointerException in Config Loader"
+            echo "  [Task]: Update Dockerfile for Config Server"
+            echo "  [Config]: Add Vault credentials path"
+            exit 1
+          fi
+          echo "✅ Title format looks good."
+
+      - name: 🏷️ Validate labels
+        run: |
+          echo "Checking labels: $LABELS"
+          if [[ -z "$LABELS" ]]; then
+            echo "❌ No labels found on this issue or PR."
+            echo "📝 Please add at least one label (e.g., 'backend', 'config-server', 'bug')."
+            exit 1
+          fi
+          echo "✅ Labels present: $LABELS"
+
+      - name: ✅ Summary
+        run: echo "🎉 Validation successful — ready for review!"
+
