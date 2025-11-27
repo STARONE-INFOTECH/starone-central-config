@@ -1,0 +1,22 @@
+# projects/hawkeyspy/common/docker-compose.override.yaml
+# This file is automatically merged when you run "docker compose up" in the project
+
+networks:
+  default:
+    external: true
+    name: starone-global-net
+
+# Optional: add aliases so services can reach Kafka with nice names
+services:
+  # Dummy services just to make connection easy from your microservices
+  kafka:
+    image: busybox
+    command: ["sleep", "infinity"]
+    networks:
+      - default
+
+  schema-registry:
+    image: busybox
+    command: ["sleep", "infinity"]
+    networks:
+      - default

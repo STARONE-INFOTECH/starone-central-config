@@ -1,9 +1,8 @@
-# File: ~/confluent-platform/docker-compose.yml
-name: confluent-global                     # Fixed, predictable project name
-
+# common/infra/kafka/docker-compose.kafka.yaml
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.1   # ← use latest 7.x (7.1.15 is very old now)
+    container_name: starone-zookeeper          # optional but nice for logs
     hostname: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -20,6 +19,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.7.1       # ← same version as zookeeper
+    container_name: starone-kafka
     hostname: kafka
     depends_on:
       zookeeper:
@@ -30,7 +30,8 @@ services:
 
       # Single clean listener – perfect for local dev
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host-gateway:9093   # ← for linux
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
@@ -47,6 +48,8 @@ services:
       - "9093:9093"                            # external access
     volumes:
       - kafka_data:/var/lib/kafka/data
+    extra_hosts:
+      - "host-gateway:host-gateway"         # Docker 20.10+ magic
     healthcheck:
       test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9093", "--list"]
       interval: 15s
@@ -56,6 +59,7 @@ services:
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.7.1
+    container_name: starone-schema-registry
     hostname: schema-registry
     depends_on:
       kafka:
@@ -68,16 +72,4 @@ services:
       SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY: BACKWARD
     ports:
       - "8081:8081"
-
-# ————————————————————————
-# Networks & volumes
-# ————————————————————————
-networks:
-  default:
-    name: confluent-global-net
-    driver: bridge
-
-volumes:
-  zoo_data:
-  zoo_logs:
-  kafka_data:
+# Move volumes & networks OUT of this file → define them only in the global file
