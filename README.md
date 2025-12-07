@@ -33,7 +33,7 @@ List of projects managed in this repo:
 - **Sportstats**: Tracks sports data with microservices (e.g., user-service, stats-service).
   - Dependencies: MySQL, PostgreSQL, Kafka.
   - See [Sportstats Structure](#sportstats-structure) for details.
-- **Ecommerce**: Manages online store operations with microservices (e.g., cart-service, order-service).
+- **Bookshow**: Manages online show booking operations with microservices (e.g., movie-service, order-service).
   - Dependencies: MySQL, Redis.
   - See [Ecommerce Structure](#ecommerce-structure) for details.
 
@@ -44,133 +44,115 @@ Each application has environment-specific (`dev`, `prod`) and core settings, alo
 
 ```
 📂 starone-central-configs-repo/
-├── 📄 README.md                # Purpose, usage, how to add projects/services
-├── 📄 LICENSE.md               # e.g., MIT
-├── 📄 CONTRIBUTING.md          # Rules for adding projects, microservices, PR process
-├── 📄 CHANGELOG.md             # Track config changes
-├── 📄 .gitignore               # Ignore .env, temp files
-├── 📂 .github/                 # GitHub workflows for validation
+├── 📄 README.md                             # How to consume, how to contribute
+├── 📄 VERSION                               # ← MUST have (e.g. v9.3.0) – semantic version
+├── 📄 .gitignore
+├── 📄 .editorconfig
+├── 📄 .gitattributes
+│
+├── 📂 common/                                    # Global defaults for ALL projects
+│   ├── 📄 base-spring.yaml
+│   ├── 📄 base-logging.yaml
+│   ├── 📄 base-observability.yaml
+│   ├── 📄 base-resilience.yaml
+│   └── 📂 security/
+│       ├── 📄 oauth2.yaml
+│       └── 📄 rbac-defaults.yaml
+│
+├── 📂 components/                                # Global infra building blocks
+│   ├── 📂 mysql/
+│   │   └── 📄 defaults.yaml
+│   ├── 📂 postgresql/
+│   ├── 📂 redis/
+│   ├── 📂 kafka/
+│   ├── 📂 elasticsearch/
+│   └── 📂 mongodb/
+│
+├── 📂 environments/                              # Global environment overrides
+│   ├── 📄 local.yaml
+│   ├── 📄 dev.yaml
+│   ├── 📄 staging.yaml
+│   └── 📄 prod.yaml
+│
+├── 📂 .github/
 │   ├── 📂 workflows/
-│   │   ├── 📄 config-validate.yml  # Lint YAML, docker-compose
-│   │   └── 📄 **sync-check.yml**   # **New: Ensure projects/services reference commons correctly**
-│   ├── 📂 ISSUE_TEMPLATE/
-│   │   └── 📄 config-change.md
-│   └── 📄 PULL_REQUEST_TEMPLATE.md
-├── 📂 common/                  # Global configs shared across ALL projects
-│   ├── 📄 base.yaml            # Global defaults (e.g., logging, timeouts)
+│   │   ├── 📄 config-validate.yml
+│   │   ├── 📄 sync-check.yml
+│   │   ├── 📄 lint-yaml.yml               # New: Lint YAML safety
+│   │   ├── 📄 sync-labels.yaml
+│   │   └── 📄 validate-issue-prs.yml
+│   └── 📄 labels.yaml
+│  
+├── 📂 common/                       # ✔ global shared config for ALL projects
+│   ├── 📄 base.yaml                 # ✔ master defaults (logging, timeouts, spring)
 │   ├── 📂 ci-cd/
 │   │   └── 📄 github-actions-template.yaml
 │   ├── 📂 deployment/
-│   │   └── 📄 base-dockerfile
-│   ├── 📂 infra/               # Global infra configs (e.g., Kafka if used by multiple projects)
-│   │   ├── 📄 docker-compose-base.yaml  # Base compose for shared services
-│   │   ├── 📂 kafka/
-│   │   │   └── 📄 config.yaml
-│   │   ├── 📂 redis/
-│   │   │   └── 📄 config.yaml
-│   │   └── 📂 **monitoring/**  # **New: Shared monitoring configs (e.g., Prometheus)**
-│   │       └── 📄 prometheus.yaml
+│   │   ├── 📄 base-dockerfile
+│   │   └── 📄 base-k8s.yaml         # New: recommended shared k8s defaults
+│   ├── 📂 infra/
+│   │   ├── 📄 kafka.yaml
+│   │   ├── 📄 redis.yaml
+│   │   ├── 📄 mysql.yaml
+│   │   └── 📄 monitoring.yaml       # New: prometheus / grafana base config
 │   └── 📂 security/
-│       └── 📄 base-rbac.yaml
-├── 📂 projects/                # One folder per project
-│   ├── 📂 sportstats/          # Project 1: Sportstats with microservices
-│   │   ├── 📂 common/          # Project-specific shared configs
-│   │   │   ├── 📄 docker-compose.yaml  # Defines MySQL, PostgreSQL, Kafka for sportstats
-│   │   │   ├── 📂 mysql/
-│   │   │   │   └── 📄 config.yaml
-│   │   │   ├── 📂 postgresql/
-│   │   │   │   └── 📄 config.yaml
-│   │   │   ├── 📂 kafka/
-│   │   │   │   └── 📄 config.yaml
-│   │   │   └── 📂 **other/**   # **New: Other shared infra (e.g., Elasticsearch)**
-│   │   │       └── 📄 config.yaml
-│   │   ├── 📂 base/            # Project-wide defaults for all services
-│   │   │   └── 📄 config.yaml
-│   │   ├── 📂 dev/             # Project-wide env overrides
-│   │   │   └── 📄 overrides.yaml
-│   │   ├── 📂 staging/
-│   │   │   └── 📄 overrides.yaml
-│   │   ├── 📂 prod/
-│   │   │   └── 📄 overrides.yaml
-│   │   ├── 📂 services/        # Microservices for sportstats
-│   │   │   ├── 📂 user-service/
-│   │   │   │   ├── 📂 base/
-│   │   │   │   │   └── 📄 config.yaml  # Extends project base
-│   │   │   │   ├── 📂 dev/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 staging/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 prod/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📄 docker-compose.override.yaml  # Service-specific compose overrides
-│   │   │   │   └── 📄 README.md
-│   │   │   ├── 📂 stats-service/  # Similar structure
-│   │   │   │   ├── 📂 base/
-│   │   │   │   │   └── 📄 config.yaml
-│   │   │   │   ├── 📂 dev/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 staging/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 prod/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📄 docker-compose.override.yaml
-│   │   │   │   └── 📄 README.md
-│   │   │   └── 📂**more-services/**  # **Add as needed (e.g., auth-service)**
-│   │   └── 📄 README.md        # Docs: Microservices overview, how to add new ones
-│   ├── 📂 dhs/       # **Project 2: Another project with microservices**
-│   │   ├── 📂 common/          # Project-specific shared infra
-│   │   │   ├── 📄 docker-compose.yaml  # MySQL, Redis, etc.
-│   │   │   ├── 📂 mysql/
-│   │   │   │   └── 📄 config.yaml
-│   │   │   └── 📂 redis/
-│   │   │       └── 📄 config.yaml
-│   │   ├── 📂 base/
-│   │   │   └── 📄 config.yaml
-│   │   ├── 📂 dev/
-│   │   │   └── 📄 overrides.yaml
-│   │   ├── 📂 staging/
-│   │   │   └── 📄 overrides.yaml
-│   │   ├── 📂 prod/
-│   │   │   └── 📄 overrides.yaml
-│   │   ├── 📂 services/
-│   │   │   ├── 📂 **cart-service/**  # Example microservice
-│   │   │   │   ├── 📂 base/
-│   │   │   │   │   └── 📄 config.yaml
-│   │   │   │   ├── 📂 dev/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 staging/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 prod/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📄 docker-compose.override.yaml
-│   │   │   │   └── 📄 README.md
-│   │   │   ├── 📂 **order-service/**  # Another microservice
-│   │   │   │   ├── 📂 base/
-│   │   │   │   │   └── 📄 config.yaml
-│   │   │   │   ├── 📂 dev/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 staging/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📂 prod/
-│   │   │   │   │   └── 📄 overrides.yaml
-│   │   │   │   ├── 📄 docker-compose.override.yaml
-│   │   │   │   └── 📄 README.md
-│   │   └── README.md
-│   └── 📂 **...**              # Add more projects as needed
-├── 📂 environments/            # Global env configs, if needed
+│       ├── 📄 base-security.yaml
+│       └── 📄 rbac.yaml
+│  
+├── 📂 environments/                  # ✔ global env overrides (NOT project-specific)
 │   ├── 📂 dev/
 │   │   └── 📄 global.yaml
 │   ├── 📂 staging/
 │   │   └── 📄 global.yaml
 │   └── 📂 prod/
 │       └── 📄 global.yaml
-├── 📂 tools/                   # Scripts for validation/merging
-│   ├── 📄 validate-configs.sh
-│   └── 📄 **compose-validate.sh**  # Validate docker-compose setups
-└── 📂 docs/
-    ├── 📄 architecture.md      # Diagram: Config flow across projects/services
-    └── 📂 **examples/**        # **New: Example configs for new projects/services**
-        └── 📄 add-service.md
+│ 
+├── 📂 projects/                                  # Per-project & per-service overrides
+│   ├── 📂 sportstats/
+│   │   ├── 📄 project.yaml                   # project-level defaults
+│   │   └── 📂 services/
+│   │       ├── 📂 user-service/
+│   │       │   ├── 📄 base.yaml
+│   │       │   ├── 📄 dev.yaml
+│   │       │   ├── 📄 staging.yaml
+│   │       │   └── 📄 prod.yaml
+│   │       ├── 📂 stats-service/
+│   │       │   ├── 📄 base.yaml
+│   │       │   ├── 📄 dev.yaml
+│   │       │   ├── 📄 staging.yaml
+│   │       │   └── 📄 prod.yaml
+│   │       └── ...
+│   ├── 📂 dhs/
+│   │   └── same pattern...
+│   └── 📂 another-project/ ...
+│  
+├── 📂 templates/                                 # Docker, Helm, compose templates
+│   ├── 📄 docker-compose.base.yml
+│   ├── 📄 helm-values.template.yaml
+│   └── 📄 kubernetes-deployment.template.yaml
+│  
+├── 📂 tools/                                     # Scripts consumed by application repos
+│   ├── 📄 validate.sh
+│   ├── 📄 render-compose.sh
+│   └── 📄 check-version.sh
+│  
+├── 📂 .github/
+│   └── workflows/
+│       ├── 📄 validate-configs.yml
+│       ├── 📄 require-version-bump.yml       # blocks PR if VERSION not bumped
+│       ├── 📄 lint-yaml.yml
+│       └── 📄 labeler.yml
+│  
+└── 📂 docs/                                   
+    ├── 📄 CHANGELOG.md
+    ├── 📄 CONFIG_CONTRIBUTING.md
+    ├── 📄 CONFIG_NAMING_CONVENTIONS.md
+    ├── 📄 CONFIG_README.md
+    ├── 📄 ENVIRONMENT_GUIDE.md
+    ├── 📄 SECURITY_POLICY.md
+    ├── 📄 service-registry.yaml
+    └── 📂 examples/
+        └── 📄 add-new-service.md
 
 ```
 ## 🏟️ Sportstats Structure
