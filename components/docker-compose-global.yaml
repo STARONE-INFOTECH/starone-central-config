@@ -1,0 +1,32 @@
+# common/infra/docker-compose.global.yaml
+name: starone-global
+services:
+  zookeeper:
+    extends:
+      file: kafka/docker-compose.kafka.yaml
+      service: zookeeper
+
+  kafka:
+    extends:
+      file: kafka/docker-compose.kafka.yaml
+      service: kafka
+
+  schema-registry-global:
+    extends:
+      file: kafka/docker-compose.kafka.yaml
+      service: schema-registry
+  
+  # Add more global services here later....
+  # ...
+
+# Define volumes and network only ONCE here (not in the kafka file)
+volumes:
+  zoo_data:
+  zoo_logs:
+  kafka_data:
+
+networks:
+  default:
+    name: starone-global-net
+    driver: bridge
+    external: false   # we create it here

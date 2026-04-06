@@ -1,0 +1,3 @@
+service:
+  description: "DHS Sales Service Initial Config"
+  version: "1.0.0"
