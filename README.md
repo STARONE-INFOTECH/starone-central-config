@@ -18,45 +18,77 @@ This repository follows a **Layered Configuration Inheritance Model**, where con
 
 ### 🔄 Configuration Resolution Order (Low → High Priority)
 
-1. `application.yml`  
-   → Global defaults (Logging, Observability, Actuator)
+1. `global/application.yml`  
+   → Contains universal settings like the Spring Banner, standard Error Formats, and basic Actuator endpoints that every service in the galaxy must follow.(Logging, Observability, Actuator)
 
-2. `spring-base.yml`  
-   → Core Spring Boot defaults (Banner, common endpoints)
+2. `global/application-{profile}.yml`
+   → Reusable infrastructure settings. This is where your Postgres, Kafka, and Security (JWT) configs live. A service only "imports" the tech it needs.
 
-3. `shared/*.yml`  
-   → Reusable infrastructure traits (DB, Security, Eureka)
+3. `shared/{tech}/{tech}-{profile}.yml`  
+   → Reusable infrastructure settings. This is where your Postgres, Kafka, and Security (JWT) configs live. A service only "imports" the tech it needs.
 
-4. `{domain}/{service}.yml`  
-   → Service-specific base configuration
+4. `{domain}/{service}/{service}.yml`  
+   → Defines the service’s unique identity: the spring.application.name, context-paths, and business-specific properties that don't change across environments.
 
-5. `{domain}/{service}-{profile}.yml`  
-   → Environment overrides (**Highest Priority**)
+5. `{domain}/{service}/{service}-{profile}.yml`  
+   → Highest File Priority. This is where you define the specific DB schema name, service-specific ports, or feature flags that change between dev, qa, and prod.
+
+6. `Environment Variables / Secret Injection (Runtime)`  
+   → Absolute Highest Priority. Used for passwords injected at runtime (K8s Secrets) or emergency overrides via -D arguments.
 
 ---
 
 ## 🗂️ Repository Structure
 
 ```
-📂 starone-central-configs-repo/
-├── 📄 VERSION
-├── 📄 application.yml
-├── 📄 spring-base.yml
-├── 📂 shared/
-│   ├── 📄 mysql-db.yml
-│   ├── 📄 security-base.yml
-│   ├── 📄 eureka-dhs.yml
-│   └── 📄 eureka-bookshow.yml
-├── 📂 dhs/
-│   ├── 📄 dhs-auth-svc.yml
-│   ├── 📄 dhs-gateway.yml
-│   └── 📄 inventory-svc.yml
-├── 📂 bookshow/
-│   ├── 📄 bookshow-auth-svc.yml
-│   ├── 📄 bookshow-gateway.yml
-│   └── 📄 booking-svc.yml
-└── 📂 scripts/
-    └── 📄 validate-yaml.sh
+starone-central-config/
+├── global/
+│   ├── application-dev.yml
+│   ├── application-qa.yml
+│   ├── application-uat.yml
+│   └── application-prod.yml
+│
+├── shared/
+│   ├── kafka/
+│   │   ├── kafka-dev.yml
+│   │   ├── kafka-qa.yml
+│   │   └── kafka-prod.yml
+│   ├── postgres/
+│   │   ├── postgres-dev.yml
+│   │   ├── postgres-qa.yml
+│   │   └── postgres-prod.yml
+│   ├── redis/
+│   │   ├── redis-dev.yml
+│   │   ├── redis-qa.yml
+│   │   └── redis-prod.yml
+│   ├── security/
+│   │   ├── jwt-dev.yml
+│   │   └── jwt-prod.yml
+│   └── observability/
+│       ├── logging-dev.yml
+│       ├── logging-qa.yml
+│       └── logging-prod.yml
+│
+├── dhs/
+│   ├── inventory-service/
+│   │   ├── inventory-service-dev.yml
+│   │   ├── inventory-service-qa.yml
+│   │   └── inventory-service-prod.yml
+│   ├── billing-service/
+│   ├── order-service/
+│   ├── auth-service/
+│   ├── notification-service/
+│   └── finance-service/
+│
+├── bookshow/
+│   ├── booking-service/
+│   ├── payment-service/
+│   ├── theater-service/
+│   ├── catalog-service/
+│   ├── notification-service/
+│   └── coupon-service/
+│
+└── README.md
 ```
 
 ---
